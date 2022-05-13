@@ -36,22 +36,24 @@ def train_test_split(dataset: Dataset, ratio = 0.8, seed = 42):
             train_dataset[0].append(noisy_audio)
     return train_dataset, test_dataset, test_ids
 
-def snr(signal, noise):
+def evaluate(clean, denoised):
+    """"
+    This function compares two set of signals by calculating the MSE (Mean squared error), MAE (Mean absolute error),
+    and SNR (signal to noise ratio) in db averaged over all the signals.
+    Receives two matrices of shape N, D. That correspond to N signals of length D.
+    clean: a 2D numpy array containing the clean (original) signals.
+    denoised: a 2D numpy array containing the denoised (reconstructed) versions of the original signals.
     """
-    This function calculates Signal-to-Noise ratio (SNR), an algorithm which compares the level
-    of a desired signal to the level of background noise. A ratio higher than 1:1 indicates more signal than noise
-    When training the model we would use MSE/MAE to gauge performance of models. 
-    This function is used to gauge the quality of audio denoised by our models.
-    --------------------
-    Parameters:
-    signal: pytorch Tensor of shape (11000,) 
-    noise: pytorch Tensor of shape (5500,)
-    --------------------
-    Returns:
-    Signal-to-noise ratio
-    """
-    signal_length, noise_length = signal.shape[0], noise.shape[0]
-    signal_mean_squares = (1 / signal_length) * torch.sum(torch.square(signal))
-    noise_mean_squares = (1 / noise_length) * torch.sum(torch.square(noise))
-    return signal_mean_squares / noise_mean_squares
-    
+
+    #MSE and MAE
+    se = ((denoised - clean) ** 2).mean(-1)
+    mse = se.mean()
+    mae = np.abs(denoised - clean).mean(-1).mean()
+
+    #SNR and PSNR
+    num = (clean**2).sum(-1)
+    den = ((denoised - clean) ** 2).sum(-1)
+    ep = 1e-9
+    SNR = 20*np.log10(np.sqrt(num)/(np.sqrt(den) + ep)).mean()
+
+    return mse, mae, SNR 
