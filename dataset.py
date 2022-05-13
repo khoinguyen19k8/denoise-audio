@@ -9,7 +9,7 @@ class DenoiseDataset(Dataset):
     self.original_audio: numpy array that contains original audio recordings, this array has the shape (num_recordings, 11000)
     self.noisy_audio: numpy array that contains noisy and downsampled audio recordings, this array has the shape (num_recordings, 5500)
     """
-    def __init__(self, original_audio: np.array, noisy_audio: np.array, original_transform = None, noisy_transform = None):
+    def __init__(self, noisy_audio: np.array, original_audio: np.array, original_transform = None, noisy_transform = None):
        self.original_audio = original_audio
        self.noisy_audio = noisy_audio 
        self.original_transform = original_transform
@@ -26,4 +26,4 @@ class DenoiseDataset(Dataset):
             org_audio = self.original_transform(org_audio)
         if self.noisy_transform:
             noisy_audio = self.noisy_transform(noisy_audio)
-        return org_audio, noisy_audio 
+        return noisy_audio, org_audio 

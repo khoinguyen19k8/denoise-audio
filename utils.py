@@ -27,13 +27,13 @@ def train_test_split(dataset: Dataset, ratio = 0.8, seed = 42):
     test_ids = set(random.sample(range(dataset_size), test_size))
 
     for i in range(dataset_size):
-        original_audio, noisy_audio = dataset[i]
+        noisy_audio, original_audio= dataset[i]
         if i in test_ids:
-            test_dataset[0].append(original_audio)
-            test_dataset[1].append(noisy_audio)
+            test_dataset[1].append(original_audio)
+            test_dataset[0].append(noisy_audio)
         else:
-            train_dataset[0].append(original_audio)
-            train_dataset[1].append(noisy_audio)
+            train_dataset[1].append(original_audio)
+            train_dataset[0].append(noisy_audio)
     return train_dataset, test_dataset, test_ids
 
 def snr(signal, noise):
