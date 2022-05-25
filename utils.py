@@ -4,17 +4,17 @@ import random
 from torch.utils.data import Dataset 
 import torch
 
-def train_test_split(dataset: Dataset, ratio = 0.8, seed = 42):
+def train_test_split(dataset, ratio = 0.8, seed = 42):
     """
     Split a dataset based on ratio into train and test set
     --------------------
     Parameters:
-    dataset: a Dataset class subclassed from torch.utils.data.Dataset
+    dataset: a list contains two lists, one for original audio and the other for noisy audio.
     ratio: ratio dividing train and test set
     seed: seed for random generation
     --------------------
     Returns:
-    train_dataset: List containing training data, List[List[np.array], List[np.array]]
+    train_dataset: List containing training data, List[List[np.array], List[np.array]]. The two lists are noisified and original audio, respectively.
     test_dataset: List containing testing data, List[List[np.array], List[np.array]]
     test_ids: ids used to divide into train and test set from the original data, List[Int]
     """
