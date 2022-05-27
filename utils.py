@@ -14,11 +14,11 @@ def train_test_split(dataset, ratio = 0.8, seed = 42):
     seed: seed for random generation
     --------------------
     Returns:
-    train_dataset: List containing training data, List[List[np.array], List[np.array]]. The two lists are noisified and original audio, respectively.
-    test_dataset: List containing testing data, List[List[np.array], List[np.array]]
+    train_dataset: List containing two numpy arrays, they have the shape of (train_size, 5500) and (train_size, 11000), respectively
+    test_dataset: List containing two numpy arrays, they have the shape of (test_size, 5500) and (test_size, 11000), respectively
     test_ids: ids used to divide into train and test set from the original data, List[Int]
     """
-    dataset_size = len(dataset)
+    dataset_size = len(dataset[0])
     random.seed(seed)
     test_size = int((1 - ratio) * dataset_size)
     
@@ -26,14 +26,15 @@ def train_test_split(dataset, ratio = 0.8, seed = 42):
     test_dataset = [[], []]
     test_ids = set(random.sample(range(dataset_size), test_size))
 
-    for i in range(dataset_size):
-        noisy_audio, original_audio= dataset[i]
+    for i, (original_audio, noisy_audio) in enumerate(zip(dataset[0], dataset[1])):
         if i in test_ids:
             test_dataset[1].append(original_audio)
             test_dataset[0].append(noisy_audio)
         else:
             train_dataset[1].append(original_audio)
             train_dataset[0].append(noisy_audio)
+    train_dataset = [np.array(item) for item in train_dataset]
+    test_dataset = [np.array(item) for item in test_dataset]
     return train_dataset, test_dataset, test_ids
 
 def evaluate(clean, denoised):
