@@ -9,8 +9,8 @@ def EncoderDecoderBasic(input_shape, output_shape):
     encoder_inputs = Input(shape = input_shape, dtype = np.float32)
     decoder_inputs = Input(shape = output_shape, dtype = np.float32)
     sampler = tfa.seq2seq.TrainingSampler()
-    encoder = LSTM(512, return_state=True)
-    decoder_cell = LSTMCell(512)
+    encoder = LSTM(256, return_state=True)
+    decoder_cell = LSTMCell(256)
     decoder = tfa.seq2seq.basic_decoder.BasicDecoder(decoder_cell, sampler)
     encoder_outputs, state_h, state_c = encoder(encoder_inputs)
     encoder_state = [state_h, state_c]
