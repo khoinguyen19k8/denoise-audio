@@ -59,7 +59,7 @@ def evaluate(clean, denoised):
 
     return mse, mae, SNR 
 
-def evaluate_tf(clean, denoised, snr_only = False):
+def evaluate_tf(clean, denoised, snr_only = True):
     
     clean, denoised = tf.squeeze(clean), tf.squeeze(denoised)
     se = tf.math.reduce_mean((denoised - clean) ** 2, axis = 1)
