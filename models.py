@@ -1,6 +1,6 @@
 import tensorflow as tf
 import tensorflow.keras as keras
-from tensorflow.keras.layers import Input, LSTM, LSTMCell, Dense, Conv1D, Conv1DTranspose, Concatenate, Cropping1D
+from tensorflow.keras.layers import Input, LSTM, LSTMCell, Dense, Conv1D, Conv1DTranspose, Concatenate, Cropping1D, LayerNormalization
 import tensorflow_addons as tfa
 import numpy as np
 
@@ -27,6 +27,7 @@ def SimpleLSTM(input_shape, output_shape):
 
 def Unet1D():
     inp = Input(shape=(5500,1))
+    norm = LayerNormalization(axis = -2)
     c1 = Conv1D(2,32,2,'same',activation='relu')(inp)
     c2 = Conv1D(4,32,2,'same',activation='relu')(c1)
     c3 = Conv1D(8,32,2,'same',activation='relu')(c2)
