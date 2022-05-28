@@ -1,8 +1,7 @@
 from cgi import test
 import numpy as np 
 import random
-from torch.utils.data import Dataset 
-import torch
+import tensorflow as tf
 
 def train_test_split(dataset, ratio = 0.8, seed = 42):
     """
@@ -33,8 +32,8 @@ def train_test_split(dataset, ratio = 0.8, seed = 42):
         else:
             train_dataset[1].append(original_audio)
             train_dataset[0].append(noisy_audio)
-    train_dataset = [np.array(item) for item in train_dataset]
-    test_dataset = [np.array(item) for item in test_dataset]
+    train_dataset = [np.array(item, dtype=np.float32) for item in train_dataset]
+    test_dataset = [np.array(item, dtype = np.float32) for item in test_dataset]
     return train_dataset, test_dataset, test_ids
 
 def evaluate(clean, denoised):
@@ -47,6 +46,7 @@ def evaluate(clean, denoised):
     """
 
     #MSE and MAE
+
     se = ((denoised - clean) ** 2).mean(-1)
     mse = se.mean()
     mae = np.abs(denoised - clean).mean(-1).mean()
@@ -58,3 +58,32 @@ def evaluate(clean, denoised):
     SNR = 20*np.log10(np.sqrt(num)/(np.sqrt(den) + ep)).mean()
 
     return mse, mae, SNR 
+
+def evaluate_tf(clean, denoised, snr_only = False):
+    
+    clean, denoised = tf.squeeze(clean), tf.squeeze(denoised)
+    se = tf.math.reduce_mean((denoised - clean) ** 2, axis = 1)
+    mse = tf.math.reduce_mean(se)
+    mae = tf.math.abs(tf.math.reduce_mean(tf.math.reduce_mean(denoised - clean, axis = 1)))
+
+    #SNR and PSNR
+    num = tf.math.reduce_sum((clean**2), axis = 1)
+    den = tf.math.reduce_sum(((denoised - clean) ** 2), axis = 1)
+    ep = 1e-9
+    SNR = 20* tf.math.reduce_mean(tf.experimental.numpy.log10(tf.math.sqrt(num)/(tf.math.sqrt(den) + ep)))
+
+    if snr_only == True:
+        return SNR
+    else:
+        return mse, mae, SNR 
+    
+def snr_tf(clean, denoised):
+    clean, denoised = tf.squeeze(clean), tf.squeeze(denoised)
+    
+    #SNR and PSNR
+    num = tf.math.reduce_sum((clean**2), axis = 1)
+    den = tf.math.reduce_sum(((denoised - clean) ** 2), axis = 1)
+    ep = 1e-9
+    SNR = 20* tf.math.reduce_mean(tf.experimental.numpy.log10(tf.math.sqrt(num)/(tf.math.sqrt(den) + ep)))
+    
+    return SNR
