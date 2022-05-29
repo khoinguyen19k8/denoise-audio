@@ -107,7 +107,10 @@ def Unet1D_v2():
 def Unet1D_v3():
     inp = Input(shape=(5500,1))
     norm = LayerNormalization(axis = -2)(inp)
-    c1_layer1 = Conv1D(32,32,2,'same',activation='relu')(norm)
+    
+    c1_layer0 = Conv1D(32,32,1,'same',activation='relu')(norm)
+
+    c1_layer1 = Conv1D(32,32,2,'same',activation='relu')(c1_layer0)
     c2_layer1 = Conv1D(32,32,1,'same',activation='relu')(c1_layer1)
 
     c1_layer2 = Conv1D(64,32,2,'same',activation='relu')(c2_layer1)
@@ -142,12 +145,33 @@ def Unet1D_v3():
     conc = Concatenate()([c2_layer1, dc1_layer1])
     dc2_layer1 = Conv1DTranspose(32,32,1,padding='same')(conc)
     
-    dc7 = Conv1DTranspose(1,32,1,padding='same',activation='linear')(dc2_layer1)
-    output_1 = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'linear')(dc7)
-    output = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'tanh')(output_1)
+    dc1_layer0 = Conv1DTranspose(32,32,2,padding='same')(dc2_layer1)
+    conc = Concatenate()([c1_layer0, dc1_layer0])
+    dc2_layer0 = Conv1DTranspose(32,32,1,padding='same')(conc)
+    
+    dc7 = Conv1DTranspose(1,32,1,padding='same',activation='linear')(dc2_layer0)
+    output = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'tanh')(dc7)
     model = keras.models.Model(inp,output)
     return model
 
+def Unet1D_v4():
+    inp = Input(shape=(5500,1))
+    norm = LayerNormalization(axis = -2)(inp)
+    c1 = Conv1D(16,32,2,'same',activation='relu')(norm)
+    c2 = Conv1D(32,32,2,'same',activation='relu')(c1)
+    c3 = Conv1D(64,32,2,'same',activation='relu')(c2)
+    c4 = Conv1D(128,32,2,'same',activation='relu')(c3)
+    c5 = Conv1D(256,32,2,'same',activation='relu')(c4)
 
-
+    dc1 = Conv1DTranspose(256,32,1,padding='same')(c5)
+    dc2 = Conv1DTranspose(128,32,2,padding='same')(dc1)
+    dc3 = Conv1DTranspose(64,32,2,padding='same')(dc2)
+    dc4 = Conv1DTranspose(32,32,2,padding='same')(dc3)
+    dc4_cr = Cropping1D((0,1))(dc4)
+    dc5 = Conv1DTranspose(16,32,2,padding='same')(dc4_cr)
+    dc6 = Conv1DTranspose(1,32,2,padding='same')(dc5)
+    dc7 = Conv1DTranspose(1,32,1,padding='same',activation='linear')(dc6)
+    output = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'tanh')(dc7)
+    model = keras.models.Model(inp,output)
+    return model
 
