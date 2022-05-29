@@ -47,9 +47,107 @@ def Unet1D():
     dc6 = Conv1DTranspose(1,32,2,padding='same')(conc)
     conc = Concatenate()([inp,dc6])
     dc7 = Conv1DTranspose(1,32,1,padding='same',activation='linear')(conc)
-    output = Conv1DTranspose(1, 1, 2, padding = 'same', activation = 'tanh')(dc7)
+    output = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'tanh')(dc7)
     model = tf.keras.models.Model(inp,output)
     return model
+
+def Unet1D_v1():
+    inp = input(shape=(5500,1))
+    norm = LayerNormalization(axis = -2)(inp)
+    c1 = Conv1D(16,32,2,'same',activation='relu')(norm)
+    c2 = Conv1D(32,32,2,'same',activation='relu')(c1)
+    c3 = Conv1D(64,32,2,'same',activation='relu')(c2)
+    c4 = Conv1D(128,32,2,'same',activation='relu')(c3)
+    c5 = Conv1D(256,32,2,'same',activation='relu')(c4)
+
+    dc1 = Conv1DTranspose(256,32,1,padding='same')(c5)
+    conc = Concatenate()([c5,dc1])
+    dc2 = Conv1DTranspose(128,32,2,padding='same')(conc)
+    conc = Concatenate()([c4,dc2])
+    dc3 = Conv1DTranspose(64,32,2,padding='same')(conc)
+    conc = Concatenate()([c3,dc3])
+    dc4 = Cropping1D((0,1))(Conv1DTranspose(32,32,2,padding='same')(conc))
+    conc = Concatenate()([c2,dc4])
+    dc5 = Conv1DTranspose(16,32,2,padding='same')(conc)
+    conc = Concatenate()([c1,dc5])
+    dc6 = Conv1DTranspose(1,32,2,padding='same')(conc)
+    conc = Concatenate()([inp,dc6])
+    dc7 = Conv1DTranspose(1,32,1,padding='same',activation='linear')(conc)
+    output = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'tanh')(dc7)
+    model = keras.models.Model(inp,output)
+    return model
+
+
+def Unet1D_v2():
+    inp = Input(shape=(5500,1))
+    norm = LayerNormalization(axis = -2)(inp)
+    c1 = Conv1D(32,32,2,'same',activation='relu')(norm)
+    c2 = Conv1D(64,32,2,'same',activation='relu')(c1)
+    c3 = Conv1D(128,32,2,'same',activation='relu')(c2)
+    c4 = Conv1D(256,32,2,'same',activation='relu')(c3)
+    c5 = Conv1D(512,32,2,'same',activation='relu')(c4)
+
+    dc1 = Conv1DTranspose(512,32,1,padding='same')(c5)
+    conc = Concatenate()([c5,dc1])
+    dc2 = Conv1DTranspose(256,32,2,padding='same')(conc)
+    conc = Concatenate()([c4,dc2])
+    dc3 = Conv1DTranspose(128,32,2,padding='same')(conc)
+    conc = Concatenate()([c3,dc3])
+    dc4 = Cropping1D((0,1))(Conv1DTranspose(64,32,2,padding='same')(conc))
+    conc = Concatenate()([c2,dc4])
+    dc5 = Conv1DTranspose(32,32,2,padding='same')(conc)
+    conc = Concatenate()([c1,dc5])
+    dc6 = Conv1DTranspose(1,32,2,padding='same')(conc)
+    conc = Concatenate()([inp,dc6])
+    dc7 = Conv1DTranspose(1,32,1,padding='same',activation='linear')(conc)
+    output = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'tanh')(dc7)
+    model = keras.models.Model(inp,output)
+    return model
+
+def Unet1D_v3():
+    inp = Input(shape=(5500,1))
+    norm = LayerNormalization(axis = -2)(inp)
+    c1_layer1 = Conv1D(32,32,2,'same',activation='relu')(norm)
+    c2_layer1 = Conv1D(32,32,1,'same',activation='relu')(c1_layer1)
+
+    c1_layer2 = Conv1D(64,32,2,'same',activation='relu')(c2_layer1)
+    c2_layer2 = Conv1D(64,32,1,'same',activation='relu')(c1_layer2)
+    
+    c1_layer3 = Conv1D(128,32,2,'same',activation='relu')(c2_layer2)
+    c2_layer3 = Conv1D(128,32,1,'same',activation='relu')(c1_layer3)
+    
+    c1_layer4 = Conv1D(256,32,2,'same',activation='relu')(c2_layer3)
+    c2_layer4 = Conv1D(256,32,1,'same',activation='relu')(c1_layer4)
+    
+    c5 = Conv1D(512,32,2,'same',activation='relu')(c2_layer4)
+
+    dc1_layer5 = Conv1DTranspose(512,32,1,padding='same')(c5)
+    dc2_layer5 = Conv1DTranspose(512,32,1,padding='same')(dc1_layer5)
+    
+    #conc = Concatenate()([c5,dc2_layer5])
+
+    dc1_layer4 = Conv1DTranspose(256,32,2,padding='same')(dc2_layer5)
+    conc = Concatenate()([c2_layer4, dc1_layer4])
+    dc2_layer4 = Conv1DTranspose(256,32,1,padding='same')(conc)
+
+    dc1_layer3 = Conv1DTranspose(128,32,2,padding='same')(dc2_layer4)
+    conc = Concatenate()([c2_layer3, dc1_layer3])
+    dc2_layer3 = Conv1DTranspose(128,32,1,padding='same')(conc)
+    
+    dc1_layer2 = Cropping1D((0,1))(Conv1DTranspose(64,32,2,padding='same')(dc2_layer3))
+    conc = Concatenate()([c2_layer2, dc1_layer2])
+    dc2_layer2 = Conv1DTranspose(64,32,1,padding='same')(conc)
+    
+    dc1_layer1 = Conv1DTranspose(32,32,2,padding='same')(dc2_layer2)
+    conc = Concatenate()([c2_layer1, dc1_layer1])
+    dc2_layer1 = Conv1DTranspose(32,32,1,padding='same')(conc)
+    
+    dc7 = Conv1DTranspose(1,32,1,padding='same',activation='linear')(dc2_layer1)
+    output_1 = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'linear')(dc7)
+    output = Conv1DTranspose(1, 64, 2, padding = 'same', activation = 'tanh')(output_1)
+    model = keras.models.Model(inp,output)
+    return model
+
 
 
 
